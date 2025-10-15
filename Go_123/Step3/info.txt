@@ -1,0 +1,43 @@
+
+3) API
+- Use ServeMux in the "net/http" package to expose a json http endpoint to create a message
+- Add a middleware to create a context with TraceID
+
+
+msgReceiver.HandleFunc("POST /step3/createmessage", CreateMessageHandler)
+
+
+http://localhost:8083/step3/createmessage
+
+
+	s := http.Server{
+		Addr:         ":8083",
+
+
+{
+  "userid": "222",
+  "message": "My Message"
+}
+
+
+documentation says
+**********************
+
++ about Body
+
+	// Body is the request's body.
+	//
+	// For client requests, a nil body means the request has no
+	// body, such as a GET request. The HTTP Client's Transport
+	// is responsible for calling the Close method.
+	//
+	// For server requests, the Request Body is always non-nil
+	// but will return EOF immediately when no body is present.
+	// The Server will close the request body. The ServeHTTP
+	// Handler does not need to.
+	//
+	// Body must allow Read to be called concurrently with Close.
+	// In particular, calling Close should unblock a Read waiting
+	// for input.
+	Body io.ReadCloser
+

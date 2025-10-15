@@ -1,0 +1,11 @@
+step 1
+**********
+
+1) Basic CLI application
+- Create a command line application that uses flags to accept a message and userID and append it to a file on disk
+- After appending the message to disk, retrieve and print the last 10 messages
+
+
++ call: step1 -u userid -m message
+	step1 -u 2345 -m blabla
+
