@@ -1,0 +1,10 @@
+
+6) gRPC
+- Create a .proto file defining a service with a Save endpoint that saves a message and returns nothing, and a GetLast10 that returns a list of messages
+- Use protoc to generate .pb.go and grpc.pb.go files that define the protobuf service in a separate module
+- Split the save and get last 10 into a store app and implements the protobuf service
+
+
+
+C:\Tools\Protoc\protoc-32.0-win64\bin\protoc --proto_path="." --go_out="./generated6" --go_opt=paths=source_relative --go-grpc_out=./generated6 --go-grpc_opt=paths=source_relative "step6.proto"
+
