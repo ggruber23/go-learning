@@ -1,0 +1,29 @@
+
+
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = "./generated6";
+
+//package generated6.protocol;
+package generated6;
+
+
+service Step6RPC
+{
+  rpc Save(MyMessage) returns (google.protobuf.Empty) {}
+  rpc GetLast10(google.protobuf.Empty) returns (MyMessageList) {} 
+}
+
+
+message MyMessage {
+  string UserID = 1;
+  string Message = 2;
+}
+
+message MyMessageList {
+  repeated MyMessage Messages = 1;
+}
+
+
