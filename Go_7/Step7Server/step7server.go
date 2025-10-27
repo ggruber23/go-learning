@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"step7server/handlers"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -29,7 +30,9 @@ func main() {
 	createMsgHandler := new(handlers.CreateMessageHandler)
 	createMsgHandler.DataChannel = dispatcher.DataChannel
 
-	go dispatcher.Run(ctx)
+	var wg4Actor sync.WaitGroup
+
+	wg4Actor.Go(func() { dispatcher.Run(ctx) })
 
 	msgReceiver := http.NewServeMux()
 
@@ -69,9 +72,12 @@ func main() {
 		}
 	}
 
-	// testing showed: web socket connection(s) not yet closed here if not closed explicitly
+	// test showed: web socket connection(s) not yet closed here if not closed explicitly
 	// fmt.Println("wait before shutdown main")
 	// time.Sleep(30 * time.Second)
+
+	// fmt.Println("wait for actor ...")
+	wg4Actor.Wait()
 
 	fmt.Println("shutdown main")
 
