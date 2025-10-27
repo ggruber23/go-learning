@@ -13,7 +13,7 @@ type RegisterHandler struct {
 	RegisterChannel chan RegisterCommand
 }
 
-func (rh RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (rh *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Connection from:", r.Host)
 	ws, err := upgrader.Upgrade(w, r, nil)
