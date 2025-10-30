@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"sync"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,6 +15,7 @@ import (
 type FileStore struct {
 	Filename   string
 	fileHandle *os.File
+	mu         sync.RWMutex // RLock for reads, Lock for writes
 }
 
 func (fs *FileStore) OpenFile() bool {
@@ -28,11 +30,10 @@ func (fs *FileStore) OpenFile() bool {
 	return true
 }
 
-// func (fs *FileStore) CloseFile() {
-// 	if fs.fileHandle != nil {
-// 		fs.fileHandle.Close()
-// 	}
-// }
+func (fs *FileStore) IsOpen() bool {
+
+	return fs.fileHandle != nil
+}
 
 func (fs *FileStore) Close() error {
 	if fs.fileHandle != nil {
@@ -43,6 +44,9 @@ func (fs *FileStore) Close() error {
 }
 
 func (fs *FileStore) AddMessage(message string) {
+
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
 
 	if fs.fileHandle == nil {
 		slog.Error("Error writing to file.", "error", "file not open")
@@ -56,6 +60,9 @@ func (fs *FileStore) AddMessage(message string) {
 }
 
 func (fs *FileStore) GetLast10Messages() []string {
+
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
 
 	if fs.fileHandle == nil {
 		slog.Error("Error reading from file.", "error", "file not open")

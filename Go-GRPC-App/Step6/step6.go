@@ -26,20 +26,18 @@ var (
 // server is used to implement Step6RPCServer
 type server struct {
 	pb.UnimplementedStep6RPCServer
+	fileStore *datastore.FileStore
 }
 
 func (s *server) Save(ctx context.Context, msg *pb.MyMessage) (*emptypb.Empty, error) {
 
 	fmt.Println("Save called")
 
-	var store datastore.FileStore
-	store.Filename = "messages.txt"
-	if !store.OpenFile() {
-		return nil, status.Errorf(codes.Internal, "could not open datastore")
+	if s.fileStore == nil || !s.fileStore.IsOpen() {
+		return nil, status.Errorf(codes.Internal, "filestore not open")
 	}
-	defer store.Close()
 
-	store.AddMessage(msg.UserID + " | " + msg.Message)
+	s.fileStore.AddMessage(msg.UserID + " | " + msg.Message)
 
 	return new(emptypb.Empty), nil
 }
@@ -48,14 +46,11 @@ func (s *server) GetLast10(ctx context.Context, dummy *emptypb.Empty) (*pb.MyMes
 
 	fmt.Println("GetLast10 called")
 
-	var store datastore.FileStore
-	store.Filename = "messages.txt"
-	if !store.OpenFile() {
-		return nil, status.Errorf(codes.Internal, "could not open datastore")
+	if s.fileStore == nil || !s.fileStore.IsOpen() {
+		return nil, status.Errorf(codes.Internal, "filestore not open")
 	}
-	defer store.Close()
 
-	lines := store.GetLast10Messages()
+	lines := s.fileStore.GetLast10Messages()
 
 	output := new(pb.MyMessageList)
 	output.Messages = make([]*pb.MyMessage, 0, 10)
@@ -72,14 +67,21 @@ func (s *server) GetLast10(ctx context.Context, dummy *emptypb.Empty) (*pb.MyMes
 
 func main() {
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
-	pb.RegisterStep6RPCServer(s, &server{})
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+
+	var fs = new(datastore.FileStore)
+	fs.Filename = "messages.txt"
+	fs.OpenFile()
+	defer fs.Close()
+
+	rpcServer := grpc.NewServer()
+	pb.RegisterStep6RPCServer(rpcServer, &server{fileStore: fs})
+	log.Printf("server listening at %v", listener.Addr())
+	if err := rpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
