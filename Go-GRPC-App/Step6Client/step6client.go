@@ -38,7 +38,7 @@ func main() {
 		log.Printf("Number of messages: %d", len(r.Messages))
 	}
 
-	_, err = c.Save(ctx, &pb.MyMessage{UserID: "1800", Message: "mountains falling,"})
+	_, err = c.Save(ctx, &pb.MyMessage{UserID: "1900", Message: "mountains rising"})
 	if err != nil {
 		log.Fatalf("could not save message")
 	} else {
